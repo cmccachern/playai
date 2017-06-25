@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 
 ROWS = 6
@@ -9,9 +10,42 @@ BLUE = 2
 
 
 class game:
-    def __init__(self):
+    def setup(self):
+        self.turn = RED
         self.board = np.zeros((ROWS, COLUMNS), np.int8)
         self.moves = np.full(COLUMNS, ROWS, np.int8)
+        self.history = []
+
+
+    def __init__(self, _id=None, player1=None, player2=None):
+        self.setup()
+        self._id = _id
+        self.player1 = player1
+        self.player2 = player2
+
+
+    def set_id(self, number):
+        self._id = number
+
+
+    def get_id(self):
+        return self._id
+
+
+    def set_player1(self, player1):
+        self.player1 = player1
+
+
+    def get_player1(self):
+        return self.player1
+
+
+    def get_player2(self):
+        return self.player2
+
+
+    def set_player2(self, player2):
+        self.player2 = player2
 
 
     def get_board(self):
@@ -34,25 +68,93 @@ class game:
             return win
 
 
-        def check_rows(self, piece):
-            search = np.sum(self.board, axis=1)
+        def check_rows(board, piece):
+            win = False
+            search = np.sum(board, axis=1)
 
+            index = 0
             for line in self.board:
-                index = 0
-
-                if search[index] > 4:
+                if search[index] > piece*4: # at least four pieces in play
                     if check(line, piece):
+                        win = True
                         break
+
+                index += 1
             
+            return win
+
+
+        def check_columns(board, piece):
+            win = check_rows(board.transpose(), piece)
+
+            return win
+
+
+        def check_diagonals(board, piece):
+            win = False
+
+            slicer = np.arange(-2,4)
+            # check left diagonal
+            for index in slicer:
+                line = np.diagonal(board, index)
+
+                if np.sum(line) > piece*4: # at least four pieces in play
+                    if check(line, piece):
+                        win = True
+                        break
+
+            if win: # if winning move found, return
+                return win
+
+            # check right diagonal
+            flip = np.fliplr(board)
+            for index in slicer:
+                line = np.diagonal(flip, index)
+
+                if np.sum(line) > piece*4: # at least four pieces in play
+                    if check(line, piece):
+                        win = True
+                        break
+
+            return win
+
+
+        board = deepcopy(self.board)
+        if check_rows(board, RED) or check_columns(board, RED) or check_diagonals(board, RED):
+            return RED
+        elif check_rows(board, BLUE) or check_columns(board, BLUE) or check_diagonals(board, BLUE):
+            return BLUE
+        else:
+            return False
+
 
     def make_move(self, column, piece):
+        self.turn = self.turn%2 + 1 # toggles between the two turns
+
         if self.moves[column] == 0:
-            print 'Invalid Move'
-            return -1
+            return False
         else:
             self.board[self.moves[column]-1, column] = piece
             self.moves[column] -= 1
-            return 0
+            self.history.append(column)
+            return True
+        
+
+    def get_history(self):
+        return self.history
+    
+        
+    def update(self, input_history):
+        if self.history == input_history:
+            return False
+        else:
+            piece = RED
+
+            self.setup()
+            for move in input_history:
+                self.make_move(move, piece)
+
+            return True
 
     #def play(self):
         
