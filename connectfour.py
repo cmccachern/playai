@@ -4,7 +4,7 @@ import numpy as np
 ROWS = 6
 COLUMNS = 7
 
-EMPTY = 0
+EMPTY = 0 # not used, empty tiles are set to zero
 RED = 1
 BLUE = 2
 
@@ -122,10 +122,12 @@ class Game:
 
 
         board = deepcopy(self.board)
-        if(check_rows(board, RED) or check_columns(board, RED) or check_diagonals(board, RED)):
+        if check_rows(board, RED) or check_columns(board, RED) or check_diagonals(board, RED):
             return RED
-        elif(check_rows(board, BLUE) or check_columns(board, BLUE) or check_diagonals(board, BLUE)):
+        elif check_rows(board, BLUE) or check_columns(board, BLUE) or check_diagonals(board, BLUE):
             return BLUE
+        elif np.sum(self.moves) == 0 :
+            return True
         else:
             return False
 
@@ -137,7 +139,7 @@ class Game:
         except ValueError:
             return False
 
-        if not (0 <= column <= 7):
+        if not (0 <= column < COLUMNS):
             return False
         elif self.moves[column] == 0 or self.turn != piece:
             return False
@@ -171,31 +173,24 @@ class Game:
 def play_game():
     g = Game()
 
-    #play = [0, 1, 1, 3, 2, 3, 2, 4, 2, 3, 3]
-    #for item in play:
-    #    g.make_move(item, g.turn)
-    #    if g.check_win():
-    #        print 'winner!!!!'
-    #        return
-
+    import time
     while(1):
-        #play = np.random.randint(0,7)
-        #g.make_move(play, RED)
         #print g.board
+        #while(not g.make_move(raw_input('->'), g.turn)):
+        #    pass
         #if g.check_win():
+        #    print g.board
+        #    print 'winner!!!!'
         #    break
         print g.board
-        while(not g.make_move(raw_input('->'), g.turn)):
+        play = np.random.randint(0,7)
+        while(not g.make_move(play, g.turn)):
             pass
         if g.check_win():
             print g.board
             print 'winner!!!!'
             break
-        #play = np.random.randint(0,7)
-        #g.make_move(play, BLUE)
-        #print g.board
-        #if g.check_win():
-        #    break
+        time.sleep(1)
 
 
 if __name__ == '__main__':
