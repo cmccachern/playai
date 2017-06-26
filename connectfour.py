@@ -74,8 +74,8 @@ class Game:
             search = np.sum(board, axis=1)
 
             index = 0
-            for line in self.board:
-                if search[index] > piece*4: # at least four pieces in play
+            for line in board:
+                if search[index] >= piece*4: # at least four pieces in play
                     if check(line, piece):
                         win = True
                         break
@@ -86,7 +86,8 @@ class Game:
 
 
         def check_columns(board, piece):
-            win = check_rows(board.transpose(), piece)
+            board_copy = deepcopy(self.board)
+            win = check_rows(board_copy.transpose(), piece)
 
             return win
 
@@ -99,7 +100,7 @@ class Game:
             for index in slicer:
                 line = np.diagonal(board, index)
 
-                if np.sum(line) > piece*4: # at least four pieces in play
+                if np.sum(line) >= piece*4: # at least four pieces in play
                     if check(line, piece):
                         win = True
                         break
@@ -112,7 +113,7 @@ class Game:
             for index in slicer:
                 line = np.diagonal(flip, index)
 
-                if np.sum(line) > piece*4: # at least four pieces in play
+                if np.sum(line) >= piece*4: # at least four pieces in play
                     if check(line, piece):
                         win = True
                         break
@@ -121,16 +122,24 @@ class Game:
 
 
         board = deepcopy(self.board)
-        if check_rows(board, RED) or check_columns(board, RED) or check_diagonals(board, RED):
+        if(check_rows(board, RED) or check_columns(board, RED) or check_diagonals(board, RED)):
             return RED
-        elif check_rows(board, BLUE) or check_columns(board, BLUE) or check_diagonals(board, BLUE):
+        elif(check_rows(board, BLUE) or check_columns(board, BLUE) or check_diagonals(board, BLUE)):
             return BLUE
         else:
             return False
 
 
     def make_move(self, column, piece):
-        if self.moves[column] == 0 or self.turn != piece:
+        try:
+            piece = int(piece)
+            column = int(column)
+        except ValueError:
+            return False
+
+        if not (0 <= column <= 7):
+            return False
+        elif self.moves[column] == 0 or self.turn != piece:
             return False
         else:
             self.board[self.moves[column]-1, column] = piece
@@ -162,19 +171,31 @@ class Game:
 def play_game():
     g = Game()
 
-    while(1):
-        play = np.random.randint(0,7)
-        g.make_move(play, RED)
-        print g.board
-        if g.check_win():
-            break
-        play = np.random.randint(0,7)
-        g.make_move(play, BLUE)
-        print g.board
-        if g.check_win():
-            break
+    #play = [0, 1, 1, 3, 2, 3, 2, 4, 2, 3, 3]
+    #for item in play:
+    #    g.make_move(item, g.turn)
+    #    if g.check_win():
+    #        print 'winner!!!!'
+    #        return
 
-    print g.board
+    while(1):
+        #play = np.random.randint(0,7)
+        #g.make_move(play, RED)
+        #print g.board
+        #if g.check_win():
+        #    break
+        print g.board
+        while(not g.make_move(raw_input('->'), g.turn)):
+            pass
+        if g.check_win():
+            print g.board
+            print 'winner!!!!'
+            break
+        #play = np.random.randint(0,7)
+        #g.make_move(play, BLUE)
+        #print g.board
+        #if g.check_win():
+        #    break
 
 
 if __name__ == '__main__':
