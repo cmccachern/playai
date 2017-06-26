@@ -9,7 +9,7 @@ RED = 1
 BLUE = 2
 
 
-class game:
+class Game:
     def setup(self):
         self.turn = RED
         self.board = np.zeros((ROWS, COLUMNS), np.int8)
@@ -56,8 +56,9 @@ class game:
         def check(line, piece):
             win = False
 
+            score = 0
             for tile in line:
-                if item == piece:
+                if tile == piece:
                     score += 1
                     if score == 4:
                         win = True
@@ -129,14 +130,14 @@ class game:
 
 
     def make_move(self, column, piece):
-        self.turn = self.turn%2 + 1 # toggles between the two turns
-
-        if self.moves[column] == 0:
+        if self.moves[column] == 0 or self.turn != piece:
             return False
         else:
             self.board[self.moves[column]-1, column] = piece
             self.moves[column] -= 1
             self.history.append(column)
+            self.turn = self.turn%2 + 1 # toggles between the two turns
+
             return True
         
 
@@ -148,11 +149,9 @@ class game:
         if self.history == input_history:
             return False
         else:
-            piece = RED
-
             self.setup()
             for move in input_history:
-                self.make_move(move, piece)
+                self.make_move(move, self.turn)
 
             return True
 
@@ -161,20 +160,19 @@ class game:
 
 
 def play_game():
-    g = game()
+    g = Game()
 
-    g.make_move(3, RED)
-    g.make_move(3, RED)
-    g.make_move(3, RED)
-    g.make_move(3, RED)
-    g.make_move(3, RED)
-    g.make_move(3, RED)
-    g.make_move(3, BLUE)
-    g.make_move(3, BLUE)
-    g.make_move(3, BLUE)
-    g.make_move(3, BLUE)
-    g.make_move(3, BLUE)
-    g.make_move(3, BLUE)
+    while(1):
+        play = np.random.randint(0,7)
+        g.make_move(play, RED)
+        print g.board
+        if g.check_win():
+            break
+        play = np.random.randint(0,7)
+        g.make_move(play, BLUE)
+        print g.board
+        if g.check_win():
+            break
 
     print g.board
 
